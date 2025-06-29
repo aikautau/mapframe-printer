@@ -1,0 +1,6 @@
+{
+  "name": "MapFrame Printer",
+  "description": "An application that allows users to select an area on OpenStreetMap and print it to a PDF in one of three predefined sizes (15x15cm, 15x10cm, 7.5x7.5cm) on an A4 sheet.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

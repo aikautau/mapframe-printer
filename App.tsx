@@ -137,6 +137,13 @@ const App: React.FC = () => {
       const mapRect = mapElem.getBoundingClientRect();
       const frameRect = frameElem.getBoundingClientRect();
 
+      // 1.5mm余白
+      const MARGIN_MM = 1.5;
+      // 地図画像サイズ（mm）: 選択サイズから余白×2を引く
+      const mapImgWidthMM = selectedSize.width * 10 - 2 * MARGIN_MM;
+      const mapImgHeightMM = selectedSize.height * 10 - 2 * MARGIN_MM;
+
+      // html2canvasでキャプチャ（枠内いっぱいでOK）
       const canvas = await window.html2canvas(mapElem, {
         useCORS: true,
         logging: false,
@@ -144,32 +151,56 @@ const App: React.FC = () => {
         height: frameRect.height,
         x: frameRect.left - mapRect.left,
         y: frameRect.top - mapRect.top,
-        scale: 4, // Increased resolution for better print quality (384 DPI)
+        scale: 4,
       });
-
       const imgData = canvas.toDataURL('image/png');
-      
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
       });
-      
-      const pdfImgWidth = selectedSize.width * 10;
-      const pdfImgHeight = selectedSize.height * 10;
-      
-      const pdfX = (A4_DIMENSIONS_MM.width - pdfImgWidth) / 2;
-      const pdfY = (A4_DIMENSIONS_MM.height - pdfImgHeight) / 2;
-      
-      pdf.addImage(imgData, 'PNG', pdfX, pdfY, pdfImgWidth, pdfImgHeight);
-      
-      // Add credit and coordinates to PDF
+
+      // PDF上の印刷枠（選択サイズ）をA4中央に配置
+      const printWidthMM = selectedSize.width * 10;
+      const printHeightMM = selectedSize.height * 10;
+      const printX = (A4_DIMENSIONS_MM.width - printWidthMM) / 2;
+      const printY = (A4_DIMENSIONS_MM.height - printHeightMM) / 2;
+
+      // 地図画像の左上座標（余白分内側）
+      const imgX = printX + MARGIN_MM;
+      const imgY = printY + MARGIN_MM;
+
+      // 地図画像を貼り付け
+      pdf.addImage(imgData, 'PNG', imgX, imgY, mapImgWidthMM, mapImgHeightMM);
+
+      // 枠線（地図画像の外周）
+      pdf.setDrawColor(0);
+      pdf.setLineWidth(0.2);
+      pdf.rect(imgX, imgY, mapImgWidthMM, mapImgHeightMM, 'S');
+
+      // トンボ（切り取り線）
+      const cropMarkLen = 5; // トンボの長さmm
+      const bleed = 3; // トンボの外側へのはみ出しmm
+      // 上左
+      pdf.line(printX - bleed, printY, printX + cropMarkLen, printY);
+      pdf.line(printX, printY - bleed, printX, printY + cropMarkLen);
+      // 上右
+      pdf.line(printX + printWidthMM - cropMarkLen, printY, printX + printWidthMM + bleed, printY);
+      pdf.line(printX + printWidthMM, printY - bleed, printX + printWidthMM, printY + cropMarkLen);
+      // 下左
+      pdf.line(printX - bleed, printY + printHeightMM, printX + cropMarkLen, printY + printHeightMM);
+      pdf.line(printX, printY + printHeightMM - cropMarkLen, printX, printY + printHeightMM + bleed);
+      // 下右
+      pdf.line(printX + printWidthMM - cropMarkLen, printY + printHeightMM, printX + printWidthMM + bleed, printY + printHeightMM);
+      pdf.line(printX + printWidthMM, printY + printHeightMM - cropMarkLen, printX + printWidthMM, printY + printHeightMM + bleed);
+
+      // クレジット・座標
       pdf.setFontSize(8);
-      pdf.setTextColor(128); // Set text color to gray
-      const creditY = pdfY + pdfImgHeight + 5; // Position credit text 5mm below the image
+      pdf.setTextColor(128);
+      const creditY = printY + printHeightMM + 5;
       pdf.text(creditText, A4_DIMENSIONS_MM.width / 2, creditY, { align: 'center' });
-      
-      const coordinatesY = creditY + 3; // Position coordinates 3mm below the credit
+      const coordinatesY = creditY + 3;
       pdf.text(coordinatesText, A4_DIMENSIONS_MM.width / 2, coordinatesY, { align: 'center' });
 
       pdf.save(`map-${selectedSize.id}.pdf`);

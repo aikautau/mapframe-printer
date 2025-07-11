@@ -218,6 +218,50 @@ const App: React.FC = () => {
     }
   }, [selectedSize]);
 
+  const handleDownloadImage = useCallback(async () => {
+    if (!mapRef.current || !mapContainerRef.current || !selectionFrameRef.current) {
+      alert("エラー: マップ要素が見つかりません。");
+      return;
+    }
+
+    setIsPrinting(true);
+    document.body.classList.add('printing-mode');
+
+    try {
+      const mapElem = mapContainerRef.current;
+      const frameElem = selectionFrameRef.current;
+
+      const mapRect = mapElem.getBoundingClientRect();
+      const frameRect = frameElem.getBoundingClientRect();
+
+      // html2canvasでキャプチャ（枠内いっぱいでOK）
+      const canvas = await window.html2canvas(mapElem, {
+        useCORS: true,
+        logging: false,
+        width: frameRect.width,
+        height: frameRect.height,
+        x: frameRect.left - mapRect.left,
+        y: frameRect.top - mapRect.top,
+        scale: 4,
+      });
+      const imgData = canvas.toDataURL('image/png');
+
+      const a = document.createElement('a');
+      a.href = imgData;
+      a.download = `map-${selectedSize.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+    } catch (error) {
+      console.error("画像のダウンロードに失敗しました:", error);
+      alert("画像のダウンロード中にエラーが発生しました。コンソールを確認してください。");
+    } finally {
+      setIsPrinting(false);
+      document.body.classList.remove('printing-mode');
+    }
+  }, [selectedSize]);
+
   return (
     <div className="relative w-full h-full font-sans">
       <div ref={mapContainerRef} id="map" className="w-full h-full bg-gray-200" />
@@ -295,6 +339,22 @@ const App: React.FC = () => {
               </>
             ) : (
               "PDFを生成"
+            )}
+          </button>
+
+          <h2 className="text-sm font-semibold text-gray-700 mb-1">4. 地図画像をダウンロード</h2>
+          <button
+            onClick={handleDownloadImage}
+            disabled={isPrinting}
+            className="w-full flex items-center justify-center bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-colors duration-200 shadow-md"
+          >
+            {isPrinting ? (
+              <>
+                <SpinnerIcon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                画像生成中...
+              </>
+            ) : (
+              "画像をダウンロード"
             )}
           </button>
         </div>

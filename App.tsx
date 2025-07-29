@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { PrintSize } from './types';
 import { PRINT_SIZES, A4_DIMENSIONS_MM, INITIAL_MAP_CONFIG } from './constants';
 import type { Map, Marker } from 'leaflet';
+import { convertDdToDms } from './utils';
 
 const SpinnerIcon: React.FC<{ className: string }> = ({ className }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -120,7 +121,9 @@ const App: React.FC = () => {
     // Get map center coordinates before capturing
     const mapCenter = mapRef.current.getCenter();
     const creditText = "© OpenStreetMap Contributors.";
-    const coordinatesText = `Lat: ${mapCenter.lat.toFixed(5)}, Lng: ${mapCenter.lng.toFixed(5)}`;
+    const latitudeDMS = convertDdToDms(mapCenter.lat, true);
+    const longitudeDMS = convertDdToDms(mapCenter.lng, false);
+    const coordinatesText = `Lat: ${latitudeDMS}, Lng: ${longitudeDMS}`;
 
     // Hide marker for printing
     if (markerRef.current) {

@@ -270,6 +270,13 @@ const App: React.FC = () => {
     setIsPrinting(true);
     document.body.classList.add('printing-mode');
 
+    // Hide marker for image download
+    if (markerRef.current) {
+        markerRef.current.setOpacity(0);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     try {
       const mapElem = mapContainerRef.current;
       const frameElem = selectionFrameRef.current;
@@ -335,6 +342,10 @@ const App: React.FC = () => {
       console.error("画像のダウンロードに失敗しました:", error);
       alert("画像のダウンロード中にエラーが発生しました。コンソールを確認してください。");
     } finally {
+      // Restore marker after image download
+      if (markerRef.current) {
+          markerRef.current.setOpacity(1);
+      }
       setIsPrinting(false);
       document.body.classList.remove('printing-mode');
     }

@@ -17,6 +17,18 @@ const SearchIcon: React.FC<{ className: string }> = ({ className }) => (
     </svg>
 );
 
+const HamburgerIcon: React.FC<{ className: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+);
+
+const CloseIcon: React.FC<{ className: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+);
+
 
 const App: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<PrintSize>(PRINT_SIZES[0]);
@@ -25,6 +37,8 @@ const App: React.FC = () => {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mapLocation, setMapLocation] = useState<string>('日本の東京駅');
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   const mapRef = useRef<Map | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -98,6 +112,11 @@ const App: React.FC = () => {
         }
         setMapLocation(display_name);
         setSearchQuery(''); // Clear input on success
+        
+        // Close sidebar on mobile after successful search
+        if (isMobile) {
+          setTimeout(() => setSidebarOpen(false), 1000);
+        }
       } else {
         setSearchError("場所が見つかりませんでした。");
       }
@@ -107,7 +126,28 @@ const App: React.FC = () => {
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, isMobile]);
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
+
+  // Check if device is mobile and handle resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Listen for resize events
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   const handlePrint = useCallback(async () => {
     if (!mapRef.current || !mapContainerRef.current || !selectionFrameRef.current) {
@@ -249,12 +289,47 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
-      const a = document.createElement('a');
-      a.href = imgData;
-      a.download = `map-${selectedSize.id}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      // Use different download methods for mobile vs desktop
+      if (isMobile) {
+        // On mobile, open image in new tab/window for user to save manually
+        const newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head><title>Map Download</title></head>
+              <body style="margin:0;text-align:center;background:#f0f0f0;">
+                <p style="padding:20px;">長押しして画像を保存してください</p>
+                <img src="${imgData}" style="max-width:100%;height:auto;" alt="Map Image" />
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        } else {
+          // Fallback: try blob download
+          try {
+            const blob = await fetch(imgData).then(res => res.blob());
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `map-${selectedSize.id}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('Fallback download failed:', error);
+            alert('ダウンロードできませんでした。デスクトップ版をお試しください。');
+          }
+        }
+      } else {
+        // Desktop download
+        const a = document.createElement('a');
+        a.href = imgData;
+        a.download = `map-${selectedSize.id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
 
     } catch (error) {
       console.error("画像のダウンロードに失敗しました:", error);
@@ -263,7 +338,7 @@ const App: React.FC = () => {
       setIsPrinting(false);
       document.body.classList.remove('printing-mode');
     }
-  }, [selectedSize]);
+  }, [selectedSize, isMobile]);
 
   return (
     <div className="relative w-full h-full font-sans">
@@ -281,9 +356,38 @@ const App: React.FC = () => {
         />
       </div>
 
-      <div className="absolute top-4 right-4 w-72 hide-for-print z-[1001]">
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-4">
-          <h1 className="text-lg font-bold text-gray-800 mb-3">地図印刷設定</h1>
+      {/* Mobile hamburger button */}
+      {isMobile && (
+        <button
+          onClick={toggleSidebar}
+          className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 z-[1002] hide-for-print"
+          aria-label="メニューを開く"
+        >
+          {sidebarOpen ? <CloseIcon className="h-6 w-6 text-gray-700" /> : <HamburgerIcon className="h-6 w-6 text-gray-700" />}
+        </button>
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        absolute z-[1001] hide-for-print transition-all duration-300 ease-in-out
+        ${isMobile 
+          ? `top-4 inset-x-4 max-h-[85vh] overflow-y-auto ${sidebarOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`
+          : 'top-4 right-4 w-72'
+        }
+      `}>
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-lg font-bold text-gray-800">地図印刷設定</h1>
+            {isMobile && (
+              <button
+                onClick={toggleSidebar}
+                className="p-1 text-gray-500 hover:text-gray-700"
+                aria-label="メニューを閉じる"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
+            )}
+          </div>
           
           <form onSubmit={handleSearch} className="mb-4">
             <h2 className="text-sm font-semibold text-gray-700 mb-1">1. 場所を検索</h2>
@@ -333,7 +437,7 @@ const App: React.FC = () => {
           <button
             onClick={handlePrint}
             disabled={isPrinting}
-            className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors duration-200 shadow-md"
+            className="w-full flex items-center justify-center bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors duration-200 shadow-md mb-2"
           >
             {isPrinting ? (
               <>
@@ -354,10 +458,10 @@ const App: React.FC = () => {
             {isPrinting ? (
               <>
                 <SpinnerIcon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                画像生成中...
+                {isMobile ? "生成中..." : "画像生成中..."}
               </>
             ) : (
-              "画像をダウンロード"
+              isMobile ? "画像ダウンロード" : "画像をダウンロード"
             )}
           </button>
         </div>

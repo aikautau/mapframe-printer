@@ -54,6 +54,7 @@ const App: React.FC = () => {
         center: INITIAL_MAP_CONFIG.center,
         zoom: INITIAL_MAP_CONFIG.zoom,
         zoomControl: false, // We will add it in a different position
+        zoomSnap: 0, // Enable fractional zoom
       });
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

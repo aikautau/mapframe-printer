@@ -58,7 +58,10 @@ const App: React.FC = () => {
       });
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        detectRetina: true,
+        maxZoom: 19,
+        maxNativeZoom: 19,
       }).addTo(map);
 
       window.L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -188,6 +191,8 @@ const App: React.FC = () => {
       const mapImgHeightMM = selectedSize.height * 10 - 2 * MARGIN_MM;
 
       // html2canvasでキャプチャ（枠内いっぱいでOK）
+      const areaCm2 = selectedSize.width * selectedSize.height;
+      const captureScale = areaCm2 >= 400 ? 6 : 4; // 大きいサイズは解像度を上げる
       const canvas = await window.html2canvas(mapElem, {
         useCORS: true,
         logging: false,
@@ -195,7 +200,7 @@ const App: React.FC = () => {
         height: frameRect.height,
         x: frameRect.left - mapRect.left,
         y: frameRect.top - mapRect.top,
-        scale: 4,
+        scale: captureScale,
       });
       const imgData = canvas.toDataURL('image/png');
 
@@ -292,6 +297,8 @@ const App: React.FC = () => {
       const frameRect = frameElem.getBoundingClientRect();
 
       // html2canvasでキャプチャ（枠内いっぱいでOK）
+      const areaCm2Img = selectedSize.width * selectedSize.height;
+      const captureScaleImg = areaCm2Img >= 400 ? 6 : 4; // 大きいサイズは解像度を上げる
       const canvas = await window.html2canvas(mapElem, {
         useCORS: true,
         logging: false,
@@ -299,7 +306,7 @@ const App: React.FC = () => {
         height: frameRect.height,
         x: frameRect.left - mapRect.left,
         y: frameRect.top - mapRect.top,
-        scale: 4,
+        scale: captureScaleImg,
       });
       const imgData = canvas.toDataURL('image/png');
 

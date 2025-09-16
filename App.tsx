@@ -204,15 +204,15 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
-      const isLargeLandscape = selectedSize.id === '34x21';
+      const isLargeLandscape = selectedSize.id === '34x20';
       const pdf = new jsPDF({
         orientation: isLargeLandscape ? 'landscape' : 'portrait',
         unit: 'mm',
-        format: isLargeLandscape ? [350, 216] : 'a4',
+        format: isLargeLandscape ? [340, 200] : 'a4',
       });
 
-      const pageWidthMM = isLargeLandscape ? 350 : A4_DIMENSIONS_MM.width;
-      const pageHeightMM = isLargeLandscape ? 216 : A4_DIMENSIONS_MM.height;
+      const pageWidthMM = isLargeLandscape ? 340 : A4_DIMENSIONS_MM.width;
+      const pageHeightMM = isLargeLandscape ? 200 : A4_DIMENSIONS_MM.height;
 
       // PDF上の印刷枠（選択サイズ）をページ中央に配置
       const printWidthMM = selectedSize.width * 10;

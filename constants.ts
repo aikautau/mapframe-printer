@@ -7,7 +7,7 @@ export const PRINT_SIZES: PrintSize[] = [
   { id: '11x11', name: '11cm × 11cm', width: 11, height: 11, aspectRatio: 'aspect-square' },
   { id: '18x18', name: '18cm × 18cm', width: 18, height: 18, aspectRatio: 'aspect-square' },
   { id: '23x17', name: '23cm × 17cm (横長)', width: 23, height: 17, aspectRatio: 'aspect-[23/17]' },
-  { id: '34x21', name: '34cm × 21cm (横長)', width: 34, height: 21, aspectRatio: 'aspect-[34/21]' },
+  { id: '34x20', name: '34cm × 20cm (横長)', width: 34, height: 20, aspectRatio: 'aspect-[34/20]' },
 ];
 
 export const A4_DIMENSIONS_MM = {

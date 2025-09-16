@@ -199,17 +199,21 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
+      const isLargeLandscape = selectedSize.id === '34x21';
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: isLargeLandscape ? 'landscape' : 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: isLargeLandscape ? [350, 216] : 'a4',
       });
 
-      // PDF上の印刷枠（選択サイズ）をA4中央に配置
+      const pageWidthMM = isLargeLandscape ? 350 : A4_DIMENSIONS_MM.width;
+      const pageHeightMM = isLargeLandscape ? 216 : A4_DIMENSIONS_MM.height;
+
+      // PDF上の印刷枠（選択サイズ）をページ中央に配置
       const printWidthMM = selectedSize.width * 10;
       const printHeightMM = selectedSize.height * 10;
-      const printX = (A4_DIMENSIONS_MM.width - printWidthMM) / 2;
-      const printY = (A4_DIMENSIONS_MM.height - printHeightMM) / 2;
+      const printX = (pageWidthMM - printWidthMM) / 2;
+      const printY = (pageHeightMM - printHeightMM) / 2;
 
       // 地図画像の左上座標（余白分内側）
       const imgX = printX + MARGIN_MM;
@@ -239,13 +243,15 @@ const App: React.FC = () => {
       pdf.line(printX + printWidthMM - cropMarkLen, printY + printHeightMM, printX + printWidthMM + bleed, printY + printHeightMM);
       pdf.line(printX + printWidthMM, printY + printHeightMM - cropMarkLen, printX + printWidthMM, printY + printHeightMM + bleed);
 
-      // クレジット・座標
-      pdf.setFontSize(8);
-      pdf.setTextColor(128);
-      const creditY = printY + printHeightMM + 5;
-      pdf.text(creditText, A4_DIMENSIONS_MM.width / 2, creditY, { align: 'center' });
-      const coordinatesY = creditY + 3;
-      pdf.text(coordinatesText, A4_DIMENSIONS_MM.width / 2, coordinatesY, { align: 'center' });
+      // クレジット・座標（34x21の時は省略）
+      if (!isLargeLandscape) {
+        pdf.setFontSize(8);
+        pdf.setTextColor(128);
+        const creditY = printY + printHeightMM + 5;
+        pdf.text(creditText, pageWidthMM / 2, creditY, { align: 'center' });
+        const coordinatesY = creditY + 3;
+        pdf.text(coordinatesText, pageWidthMM / 2, coordinatesY, { align: 'center' });
+      }
 
       pdf.save(`map-${selectedSize.id}.pdf`);
       

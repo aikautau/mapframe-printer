@@ -204,7 +204,7 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
-      const isLargeLandscape = selectedSize.id === '33.2x20';
+      const isLargeLandscape = selectedSize.id === '28.0x20';
       const pdf = new jsPDF({
         orientation: isLargeLandscape ? 'landscape' : 'portrait',
         unit: 'mm',

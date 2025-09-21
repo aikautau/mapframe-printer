@@ -6,7 +6,7 @@ export const PRINT_SIZES: PrintSize[] = [
   { id: '12x12', name: '12cm × 12cm', width: 12, height: 12, aspectRatio: 'aspect-square' },
   { id: '17.4x11.4', name: '17.4cm × 11.4cm (横長)', width: 17.4, height: 11.4, aspectRatio: 'aspect-[174/114]' },
   { id: '12.4x16.4', name: '12.4cm × 16.4cm (縦長)', width: 12.4, height: 16.4, aspectRatio: 'aspect-[124/164]' },
-  { id: '20.4x28.4', name: '20.4cm × 28.4cm (横長)', width: 20.4, height: 28.4, aspectRatio: 'aspect-[204/284]' },
+  { id: '28.4x20.4', name: '28.4cm × 20.4cm (横長)', width: 28.4, height: 20.4, aspectRatio: 'aspect-[284/204]' },
 ];
 
 export const A4_DIMENSIONS_MM = {

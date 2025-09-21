@@ -204,7 +204,7 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
-      const isLargeLandscape = false; // All sizes now use A4 portrait
+      const isLargeLandscape = selectedSize.id === '28.4x20.4'; // Use A4 landscape for this size
       const pdf = new jsPDF({
         orientation: isLargeLandscape ? 'landscape' : 'portrait',
         unit: 'mm',

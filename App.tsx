@@ -39,6 +39,7 @@ const App: React.FC = () => {
   const [mapLocation, setMapLocation] = useState<string>('日本の東京駅');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [zoomLevel, setZoomLevel] = useState<number>(INITIAL_MAP_CONFIG.zoom);
 
   const mapRef = useRef<Map | null>(null);
   const markerRef = useRef<Marker | null>(null);
@@ -69,6 +70,11 @@ const App: React.FC = () => {
       // Add initial marker for Tokyo Station
       const initialMarker = window.L.marker(INITIAL_MAP_CONFIG.center).addTo(map);
       markerRef.current = initialMarker;
+
+      // Add zoom event listener
+      map.on('zoom', () => {
+        setZoomLevel(map.getZoom());
+      });
 
       mapRef.current = map;
     }
@@ -368,6 +374,13 @@ const App: React.FC = () => {
   return (
     <div className="relative w-full h-full font-sans">
       <div ref={mapContainerRef} id="map" className="w-full h-full bg-gray-200" />
+      
+      {/* Zoom level display */}
+      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 z-[1000] hide-for-print">
+        <div className="text-sm font-medium text-gray-700">
+          ズーム: {zoomLevel.toFixed(1)}
+        </div>
+      </div>
       
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[999]">
         <div

@@ -58,11 +58,11 @@ const App: React.FC = () => {
         zoomSnap: 0, // Enable fractional zoom
       });
 
-      window.L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.png', {
-        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         detectRetina: true,
-        maxZoom: 20,
-        maxNativeZoom: 20,
+        maxZoom: 19,
+        maxNativeZoom: 19,
       }).addTo(map);
 
       window.L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -373,7 +373,14 @@ const App: React.FC = () => {
 
   return (
     <div className="relative w-full h-full font-sans">
-      <div ref={mapContainerRef} id="map" className="w-full h-full bg-gray-200" />
+      <div 
+        ref={mapContainerRef} 
+        id="map" 
+        className="w-full h-full bg-gray-200"
+        style={{
+          filter: 'contrast(1.5) brightness(1.2) saturate(0.1) hue-rotate(0deg)',
+        }}
+      />
       
       {/* Zoom level display */}
       <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 z-[1000] hide-for-print">

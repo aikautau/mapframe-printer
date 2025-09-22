@@ -373,14 +373,7 @@ const App: React.FC = () => {
 
   return (
     <div className="relative w-full h-full font-sans">
-      <div 
-        ref={mapContainerRef} 
-        id="map" 
-        className="w-full h-full bg-gray-200"
-        style={{
-          filter: 'contrast(1.5) brightness(1.2) saturate(0.1) hue-rotate(0deg)',
-        }}
-      />
+      <div ref={mapContainerRef} id="map" className="w-full h-full bg-gray-200" />
       
       {/* Zoom level display */}
       <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg px-3 py-2 z-[1000] hide-for-print">

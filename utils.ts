@@ -13,4 +13,4 @@ export const convertDdToDms = (dd: number, isLatitude: boolean): string => {
   }
 
   return `${degrees}°${minutes}'${seconds}''${direction}`;
-}; 
+};

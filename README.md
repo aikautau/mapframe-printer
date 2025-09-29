@@ -1,14 +1,29 @@
-# Run and deploy your AI Studio app
+# MapFrame Printer
 
-This contains everything you need to run your app locally.
+地図の好きな場所を選択してPDFや画像としてダウンロードできるアプリケーションです。
 
-## Run Locally
+## ローカルで実行
 
-**Prerequisites:**  Node.js
+**必要なもの:** Node.js
 
+1. 依存関係をインストール:
+   ```bash
+   npm install
+   ```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+2. アプリを起動:
+   ```bash
+   npm run dev
+   ```
+
+## ビルド
+
+```bash
+npm run build
+```
+
+## デプロイ
+
+```bash
+npm run deploy
+```

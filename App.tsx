@@ -190,7 +190,7 @@ const App: React.FC = () => {
       const mapRect = mapElem.getBoundingClientRect();
       const frameRect = frameElem.getBoundingClientRect();
 
-      const isTaishiSize = selectedSize.id === '27.5x20.5';
+      const isTaishiSize = selectedSize.id === '29x20';
 
       // 余白: 太子はなし、それ以外は1.5mm
       const marginMM = isTaishiSize ? 0 : 1.5;
@@ -212,14 +212,19 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
+      const TAISHI_PAGE_PADDING_MM = 30; // 余白を確保してプリントしやすくする
+      const taishiPageWidthMM = selectedSize.width * 10 + TAISHI_PAGE_PADDING_MM * 2;
+      const taishiPageHeightMM = selectedSize.height * 10 + TAISHI_PAGE_PADDING_MM * 2;
+
+      const taishiOrientation = selectedSize.width >= selectedSize.height ? 'landscape' : 'portrait';
       const pdf = new jsPDF({
-        orientation: isTaishiSize ? 'landscape' : 'portrait',
+        orientation: isTaishiSize ? taishiOrientation : 'portrait',
         unit: 'mm',
-        format: isTaishiSize ? [350, 216] : 'a4',
+        format: isTaishiSize ? [taishiPageWidthMM, taishiPageHeightMM] : 'a4',
       });
 
-      const pageWidthMM = isTaishiSize ? 350 : A4_DIMENSIONS_MM.width;
-      const pageHeightMM = isTaishiSize ? 216 : A4_DIMENSIONS_MM.height;
+      const pageWidthMM = isTaishiSize ? taishiPageWidthMM : A4_DIMENSIONS_MM.width;
+      const pageHeightMM = isTaishiSize ? taishiPageHeightMM : A4_DIMENSIONS_MM.height;
 
       // PDF上の印刷枠（選択サイズ）をページ中央に配置
       const printWidthMM = selectedSize.width * 10;

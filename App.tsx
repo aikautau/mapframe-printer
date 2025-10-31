@@ -190,11 +190,13 @@ const App: React.FC = () => {
       const mapRect = mapElem.getBoundingClientRect();
       const frameRect = frameElem.getBoundingClientRect();
 
-      // 1.5mm余白
-      const MARGIN_MM = 1.5;
+      const isTaishiSize = selectedSize.id === '27.5x20.5';
+
+      // 余白: 太子はなし、それ以外は1.5mm
+      const marginMM = isTaishiSize ? 0 : 1.5;
       // 地図画像サイズ（mm）: 選択サイズから余白×2を引く
-      const mapImgWidthMM = selectedSize.width * 10 - 2 * MARGIN_MM;
-      const mapImgHeightMM = selectedSize.height * 10 - 2 * MARGIN_MM;
+      const mapImgWidthMM = selectedSize.width * 10 - 2 * marginMM;
+      const mapImgHeightMM = selectedSize.height * 10 - 2 * marginMM;
 
       // html2canvasでキャプチャ（枠内いっぱいでOK）
       const areaCm2 = selectedSize.width * selectedSize.height;
@@ -210,15 +212,14 @@ const App: React.FC = () => {
       });
       const imgData = canvas.toDataURL('image/png');
 
-      const isLargeLandscape = selectedSize.id === '27.4x20.4'; // Use A4 landscape for this size
       const pdf = new jsPDF({
-        orientation: isLargeLandscape ? 'landscape' : 'portrait',
+        orientation: isTaishiSize ? 'landscape' : 'portrait',
         unit: 'mm',
-        format: isLargeLandscape ? [350, 216] : 'a4',
+        format: isTaishiSize ? [350, 216] : 'a4',
       });
 
-      const pageWidthMM = isLargeLandscape ? 350 : A4_DIMENSIONS_MM.width;
-      const pageHeightMM = isLargeLandscape ? 216 : A4_DIMENSIONS_MM.height;
+      const pageWidthMM = isTaishiSize ? 350 : A4_DIMENSIONS_MM.width;
+      const pageHeightMM = isTaishiSize ? 216 : A4_DIMENSIONS_MM.height;
 
       // PDF上の印刷枠（選択サイズ）をページ中央に配置
       const printWidthMM = selectedSize.width * 10;
@@ -227,8 +228,8 @@ const App: React.FC = () => {
       const printY = (pageHeightMM - printHeightMM) / 2;
 
       // 地図画像の左上座標（余白分内側）
-      const imgX = printX + MARGIN_MM;
-      const imgY = printY + MARGIN_MM;
+      const imgX = printX + marginMM;
+      const imgY = printY + marginMM;
 
       // 地図画像を貼り付け
       pdf.addImage(imgData, 'PNG', imgX, imgY, mapImgWidthMM, mapImgHeightMM);
@@ -238,24 +239,26 @@ const App: React.FC = () => {
       pdf.setLineWidth(0.2);
       pdf.rect(imgX, imgY, mapImgWidthMM, mapImgHeightMM, 'S');
 
-      // トンボ（切り取り線）
-      const cropMarkLen = 5; // トンボの長さmm
-      const bleed = 3; // トンボの外側へのはみ出しmm
-      // 上左
-      pdf.line(printX - bleed, printY, printX + cropMarkLen, printY);
-      pdf.line(printX, printY - bleed, printX, printY + cropMarkLen);
-      // 上右
-      pdf.line(printX + printWidthMM - cropMarkLen, printY, printX + printWidthMM + bleed, printY);
-      pdf.line(printX + printWidthMM, printY - bleed, printX + printWidthMM, printY + cropMarkLen);
-      // 下左
-      pdf.line(printX - bleed, printY + printHeightMM, printX + cropMarkLen, printY + printHeightMM);
-      pdf.line(printX, printY + printHeightMM - cropMarkLen, printX, printY + printHeightMM + bleed);
-      // 下右
-      pdf.line(printX + printWidthMM - cropMarkLen, printY + printHeightMM, printX + printWidthMM + bleed, printY + printHeightMM);
-      pdf.line(printX + printWidthMM, printY + printHeightMM - cropMarkLen, printX + printWidthMM, printY + printHeightMM + bleed);
+      if (!isTaishiSize) {
+        // トンボ（切り取り線）
+        const cropMarkLen = 5; // トンボの長さmm
+        const bleed = 3; // トンボの外側へのはみ出しmm
+        // 上左
+        pdf.line(printX - bleed, printY, printX + cropMarkLen, printY);
+        pdf.line(printX, printY - bleed, printX, printY + cropMarkLen);
+        // 上右
+        pdf.line(printX + printWidthMM - cropMarkLen, printY, printX + printWidthMM + bleed, printY);
+        pdf.line(printX + printWidthMM, printY - bleed, printX + printWidthMM, printY + cropMarkLen);
+        // 下左
+        pdf.line(printX - bleed, printY + printHeightMM, printX + cropMarkLen, printY + printHeightMM);
+        pdf.line(printX, printY + printHeightMM - cropMarkLen, printX, printY + printHeightMM + bleed);
+        // 下右
+        pdf.line(printX + printWidthMM - cropMarkLen, printY + printHeightMM, printX + printWidthMM + bleed, printY + printHeightMM);
+        pdf.line(printX + printWidthMM, printY + printHeightMM - cropMarkLen, printX + printWidthMM, printY + printHeightMM + bleed);
+      }
 
-      // クレジット・座標（34x21の時は省略）
-      if (!isLargeLandscape) {
+      // クレジット・座標（太子額は省略）
+      if (!isTaishiSize) {
         pdf.setFontSize(8);
         pdf.setTextColor(128);
         const creditY = printY + printHeightMM + 5;

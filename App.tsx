@@ -190,7 +190,7 @@ const App: React.FC = () => {
       const mapRect = mapElem.getBoundingClientRect();
       const frameRect = frameElem.getBoundingClientRect();
 
-      const isTaishiSize = selectedSize.id === '29x20';
+      const isTaishiSize = selectedSize.id === '27.8x19.8';
 
       // 余白: 太子はなし、それ以外は1.5mm
       const marginMM = isTaishiSize ? 0 : 1.5;
